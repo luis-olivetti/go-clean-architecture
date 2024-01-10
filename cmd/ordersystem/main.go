@@ -52,11 +52,11 @@ func main() {
 
 	orderCreatedEvent := event.NewOrderCreated()
 	createOrderHandler := NewWebOrderHandler(db, eventDispatcher, orderCreatedEvent)
-	webserver.AddHandler("/order", createOrderHandler.Create)
+	webserver.AddHandler("POST", "/order", createOrderHandler.Create)
 
 	getAllOrdersEvent := event.NewGetAllOrders()
 	getAllOrdersHandler := NewWebOrderHandler(db, eventDispatcher, getAllOrdersEvent)
-	webserver.AddHandler("/orders", getAllOrdersHandler.GetAllOrders)
+	webserver.AddHandler("GET", "/order", getAllOrdersHandler.GetAllOrders)
 
 	fmt.Println("Starting web server on port", configs.WebServerPort)
 	go webserver.Start()
