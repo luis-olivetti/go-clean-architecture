@@ -9,6 +9,7 @@ import (
 	graphql_handler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/devfullcycle/20-CleanArch/configs"
+	"github.com/devfullcycle/20-CleanArch/internal/event"
 	"github.com/devfullcycle/20-CleanArch/internal/event/handler"
 	"github.com/devfullcycle/20-CleanArch/internal/infra/graph"
 	"github.com/devfullcycle/20-CleanArch/internal/infra/grpc/pb"
@@ -41,12 +42,22 @@ func main() {
 	eventDispatcher.Register("OrderCreated", &handler.OrderCreatedHandler{
 		RabbitMQChannel: rabbitMQChannel,
 	})
+	eventDispatcher.Register("GetAllOrders", &handler.GetAllOrdersHandler{
+		RabbitMQChannel: rabbitMQChannel,
+	})
 
 	createOrderUseCase := NewCreateOrderUseCase(db, eventDispatcher)
 
 	webserver := webserver.NewWebServer(configs.WebServerPort)
-	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
-	webserver.AddHandler("/order", webOrderHandler.Create)
+
+	orderCreatedEvent := event.NewOrderCreated()
+	createOrderHandler := NewWebOrderHandler(db, eventDispatcher, orderCreatedEvent)
+	webserver.AddHandler("/order", createOrderHandler.Create)
+
+	getAllOrdersEvent := event.NewGetAllOrders()
+	getAllOrdersHandler := NewWebOrderHandler(db, eventDispatcher, getAllOrdersEvent)
+	webserver.AddHandler("/orders", getAllOrdersHandler.GetAllOrders)
+
 	fmt.Println("Starting web server on port", configs.WebServerPort)
 	go webserver.Start()
 

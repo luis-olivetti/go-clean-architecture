@@ -17,6 +17,10 @@ import (
 	"github.com/google/wire"
 )
 
+import (
+	_ "github.com/go-sql-driver/mysql"
+)
+
 // Injectors from wire.go:
 
 func NewCreateOrderUseCase(db *sql.DB, eventDispatcher events.EventDispatcherInterface) *usecase.CreateOrderUseCase {
@@ -26,10 +30,16 @@ func NewCreateOrderUseCase(db *sql.DB, eventDispatcher events.EventDispatcherInt
 	return createOrderUseCase
 }
 
-func NewWebOrderHandler(db *sql.DB, eventDispatcher events.EventDispatcherInterface) *web.WebOrderHandler {
+func NewGetAllOrdersUseCase(db *sql.DB, eventDispatcher events.EventDispatcherInterface) *usecase.GetAllOrdersUseCase {
 	orderRepository := database.NewOrderRepository(db)
-	orderCreated := event.NewOrderCreated()
-	webOrderHandler := web.NewWebOrderHandler(eventDispatcher, orderRepository, orderCreated)
+	getAllOrders := event.NewGetAllOrders()
+	getAllOrdersUseCase := usecase.NewGetAllOrdersUseCase(orderRepository, getAllOrders, eventDispatcher)
+	return getAllOrdersUseCase
+}
+
+func NewWebOrderHandler(db *sql.DB, eventDispatcher events.EventDispatcherInterface, event2 events.EventInterface) *web.WebOrderHandler {
+	orderRepository := database.NewOrderRepository(db)
+	webOrderHandler := web.NewWebOrderHandler(eventDispatcher, orderRepository, event2)
 	return webOrderHandler
 }
 
@@ -37,6 +47,8 @@ func NewWebOrderHandler(db *sql.DB, eventDispatcher events.EventDispatcherInterf
 
 var setOrderRepositoryDependency = wire.NewSet(database.NewOrderRepository, wire.Bind(new(entity.OrderRepositoryInterface), new(*database.OrderRepository)))
 
-var setEventDispatcherDependency = wire.NewSet(events.NewEventDispatcher, event.NewOrderCreated, wire.Bind(new(events.EventInterface), new(*event.OrderCreated)), wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
+var setEventDispatcherDependency = wire.NewSet(events.NewEventDispatcher, event.NewOrderCreated, event.NewGetAllOrders, wire.Bind(new(events.EventInterface), new(*event.OrderCreated)), wire.Bind(new(events.EventInterface), new(*event.GetAllOrders)), wire.Bind(new(events.EventDispatcherInterface), new(*events.EventDispatcher)))
 
 var setOrderCreatedEvent = wire.NewSet(event.NewOrderCreated, wire.Bind(new(events.EventInterface), new(*event.OrderCreated)))
+
+var setGetAllOrdersEvent = wire.NewSet(event.NewGetAllOrders, wire.Bind(new(events.EventInterface), new(*event.GetAllOrders)))
