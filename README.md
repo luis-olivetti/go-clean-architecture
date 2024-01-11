@@ -32,3 +32,12 @@ Como executar:
 ```
 go run main.go wire_gen.go
 ```
+
+
+Anotações para desenvolvimento
+
+Para gerar o proto buffers
+
+protoc --proto_path=internal/infra/grpc/protofiles --go_out=internal/infra/grpc/pb --go_opt=paths=source_relative \
+  --go-grpc_out=internal/infra/grpc/pb --go-grpc_opt=paths=source_relative \
+  internal/infra/grpc/protofiles/order.proto
