@@ -14,6 +14,14 @@ Não esqueça de criar as migrações necessárias e o arquivo api.http (para ex
 
 ## Como executar a aplicação?
 
+Pré-requisito:
+Possuir um banco de dados chamado **orders** com a entidade **orders**
+
+```sql
+CREATE TABLE orders (id varchar(255) NOT NULL, price float NOT NULL, tax float NOT NULL, final_price float NOT NULL, PRIMARY KEY (id))
+```
+
+Execute os seguintes comandos para iniciar a aplicação REST, GraphQL e GRPC
 ```
 cd cmd/ordersystem
 go run main.go wire_gen.go
