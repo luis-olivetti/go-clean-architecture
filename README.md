@@ -12,16 +12,25 @@ Não esqueça de criar as migrações necessárias e o arquivo api.http (para ex
 
 ---
 
+## Pré-requisito
+
+- golang-migrate
+
 ## Como executar a aplicação?
 
-Pré-requisito:
-Possuir um banco de dados chamado **orders** com a entidade **orders**
+O primeiro passo é instanciar os contêineres:
 
-```sql
-CREATE TABLE orders (id varchar(255) NOT NULL, price float NOT NULL, tax float NOT NULL, final_price float NOT NULL, PRIMARY KEY (id))
+```
+docker compose up -d
 ```
 
-Execute os seguintes comandos para iniciar a aplicação REST, GraphQL e GRPC
+Em seguida, execute as migrações com o comando:
+
+```
+make migrate_up
+```
+
+Com a estrutura do banco de dados criada, execute os seguintes comandos para iniciar a aplicação REST, GraphQL e GRPC
 ```
 cd cmd/ordersystem
 go run main.go wire_gen.go
@@ -79,4 +88,14 @@ protoc --proto_path=internal/infra/grpc/protofiles --go_out=internal/infra/grpc/
 
 ```
 go run github.com/99designs/gqlgen generate
+```
+
+### Instalar golang-migrate no Ubuntu
+
+```
+curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey > key.gpg
+sudo apt-key add key.gpg
+echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/migrate.list
+apt-get update
+apt-get install -y migrate
 ```
